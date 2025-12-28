@@ -1,0 +1,11 @@
+credentials:
+  usernames:
+    admin:
+      email: admin@domainbot.com
+      name: Admin User
+      password: "$2b$12$GpFCqAj0bJipxu6u7nk5XODuCpc19zMzoHkdIO7H6bF81jbfapIMy"
+
+cookie:
+  expiry_days: 7
+  key: expired_domain_secret_key
+  name: expired_domain_cookie
