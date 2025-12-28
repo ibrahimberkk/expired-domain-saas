@@ -5,3 +5,4 @@ beautifulsoup4
 lxml
 streamlit-authenticator
 pyyaml
+plotly
