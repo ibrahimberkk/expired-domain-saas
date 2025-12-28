@@ -29,9 +29,9 @@ authenticator = stauth.Authenticate(
 # --------------------------------------------------
 # LOGIN
 # --------------------------------------------------
-name, authentication_status, username = authenticator.login(
-    "Giriş Yap", "main"
-)
+st.title("Giriş Yap")
+name, authentication_status, username = authenticator.login()
+
 
 if authentication_status is False:
     st.error("Kullanıcı adı veya şifre hatalı")
