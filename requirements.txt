@@ -1,5 +1,7 @@
 streamlit
-streamlit-authenticator==0.2.2
 pandas
+requests
+beautifulsoup4
+lxml
+streamlit-authenticator
 pyyaml
-plotly
