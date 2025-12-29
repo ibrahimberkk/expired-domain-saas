@@ -29,21 +29,23 @@ authenticator = stauth.Authenticate(
 # --------------------------------------------------
 # LOGIN
 # --------------------------------------------------
-st.title("Giriş Yap")
-name, authentication_status, username = authenticator.login(location="main")
+import streamlit as st
+import streamlit_authenticator as stauth
 
+st.title("Giriş Yap")
+
+authenticator.login(location="main")
+
+authentication_status = st.session_state.get("authentication_status")
+name = st.session_state.get("name")
+username = st.session_state.get("username")
 
 if authentication_status is False:
-    st.error("Kullanıcı adı veya şifre hatalı")
-    st.stop()
-
+    st.error("Kullanıcı adı veya şifre yanlış")
 elif authentication_status is None:
     st.warning("Lütfen giriş yapın")
-    st.stop()
-
-authenticator.logout("Çıkış", "sidebar")
-st.sidebar.success(f"Hoş geldin {name}")
-
+elif authentication_status:
+    st.success(f"Hoş geldin {name}")
 # --------------------------------------------------
 # LOAD DATA
 # --------------------------------------------------
