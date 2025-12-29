@@ -18,7 +18,7 @@ credentials = {
     "usernames": {
         "admin": {
             "name": "Admin",
-            "password": "$2b$12$0Yp8pYtG7tZz0Qx1j1jYQO8E1E2p9V6nGJQ6Z0V9bP5nQF9GQX9a2"
+            "password": "$2b$12$JJUnNxw2gohO6qMrqwRChOVhc2eYSP9ikcpA2HbwXkTejYBqZl3CK"
         }
     }
 }
