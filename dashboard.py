@@ -2,8 +2,6 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
 import random
-import yaml
-from yaml.loader import SafeLoader
 
 # -------------------------------
 # SAYFA AYARLARI
@@ -16,18 +14,17 @@ st.set_page_config(
 # -------------------------------
 # KULLANICI AYARLARI (STATIK)
 # -------------------------------
-users = {
+credentials = {
     "usernames": {
         "admin": {
             "name": "Admin",
-            # sifre: admin123
-            "password": stauth.Hasher(["admin123"]).generate()[0]
+            "password": "$2b$12$0Yp8pYtG7tZz0Qx1j1jYQO8E1E2p9V6nGJQ6Z0V9bP5nQF9GQX9a2"
         }
     }
 }
 
 authenticator = stauth.Authenticate(
-    users,
+    credentials,
     "expired_domain_cookie",
     "expired_domain_key",
     cookie_expiry_days=7
@@ -42,7 +39,6 @@ authenticator.login(location="main")
 
 authentication_status = st.session_state.get("authentication_status")
 name = st.session_state.get("name")
-username = st.session_state.get("username")
 
 if authentication_status is False:
     st.error("Kullanıcı adı veya şifre yanlış")
@@ -53,7 +49,7 @@ if authentication_status is None:
     st.stop()
 
 # -------------------------------
-# DASHBOARD (LOGIN SONRASI)
+# DASHBOARD
 # -------------------------------
 st.success(f"Hoş geldin {name}")
 
