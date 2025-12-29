@@ -1,38 +1,42 @@
 import streamlit as st
+import streamlit_authenticator as stauth
 import pandas as pd
+import random
 import yaml
 from yaml.loader import SafeLoader
-import streamlit_authenticator as stauth
-import plotly.express as px
 
-# --------------------------------------------------
-# PAGE CONFIG
-# --------------------------------------------------
+# -------------------------------
+# SAYFA AYARLARI
+# -------------------------------
 st.set_page_config(
-    page_title="Expired Domain Panel",
+    page_title="Expired Domain SaaS",
     layout="wide"
 )
 
-# --------------------------------------------------
-# LOAD USERS
-# --------------------------------------------------
-with open("users.yaml") as file:
-    config = yaml.load(file, Loader=SafeLoader)
+# -------------------------------
+# KULLANICI AYARLARI (STATIK)
+# -------------------------------
+users = {
+    "usernames": {
+        "admin": {
+            "name": "Admin",
+            # sifre: admin123
+            "password": stauth.Hasher(["admin123"]).generate()[0]
+        }
+    }
+}
 
 authenticator = stauth.Authenticate(
-    config["credentials"],
-    config["cookie"]["name"],
-    config["cookie"]["key"],
-    config["cookie"]["expiry_days"],
+    users,
+    "expired_domain_cookie",
+    "expired_domain_key",
+    cookie_expiry_days=7
 )
 
-# --------------------------------------------------
+# -------------------------------
 # LOGIN
-# --------------------------------------------------
-import streamlit as st
-import streamlit_authenticator as stauth
-
-st.title("Giriş Yap")
+# -------------------------------
+st.title("🔐 Giriş Yap")
 
 authenticator.login(location="main")
 
@@ -42,64 +46,86 @@ username = st.session_state.get("username")
 
 if authentication_status is False:
     st.error("Kullanıcı adı veya şifre yanlış")
-elif authentication_status is None:
+    st.stop()
+
+if authentication_status is None:
     st.warning("Lütfen giriş yapın")
-elif authentication_status:
-    st.success(f"Hoş geldin {name}")
-# --------------------------------------------------
-# LOAD DATA
-# --------------------------------------------------
-df = pd.read_csv("seo_checked_domains.csv")
+    st.stop()
 
-# ---- SAFE COLUMN CHECKS ----
-if "backlink_estimate" not in df.columns:
-    df["backlink_estimate"] = 0
+# -------------------------------
+# DASHBOARD (LOGIN SONRASI)
+# -------------------------------
+st.success(f"Hoş geldin {name}")
 
-if "niche" not in df.columns:
-    df["niche"] = "general"
+authenticator.logout("Çıkış Yap", "sidebar")
 
-if "seo_score" not in df.columns:
-    df["seo_score"] = 0
+st.sidebar.title("Ayarlar")
 
-# --------------------------------------------------
-# SIDEBAR FILTERS
-# --------------------------------------------------
-st.sidebar.header("🔍 Filtreler")
+st.header("🚀 Expired Domain Tarama Paneli")
 
-max_seo_score = int(df["seo_score"].max())
-
-min_seo, max_seo = st.sidebar.slider(
-    "SEO Skoru",
-    0,
-    max(1, max_seo_score),
-    (0, max(1, max_seo_score))
+# -------------------------------
+# INPUTLAR
+# -------------------------------
+niche = st.text_input(
+    "Niche / Sektör",
+    placeholder="örnek: teknoloji, sağlık, e-ticaret"
 )
 
-selected_niches = st.sidebar.multiselect(
-    "Niche",
-    sorted(df["niche"].unique()),
-    default=list(df["niche"].unique())
+domain_count = st.slider(
+    "Kaç domain üretilecek?",
+    min_value=5,
+    max_value=50,
+    value=10
 )
 
-max_backlink = int(df["backlink_estimate"].max())
+min_backlink = st.slider(
+    "Minimum Backlink Tahmini",
+    min_value=0,
+    max_value=500,
+    value=0
+)
 
-if max_backlink > 0:
-    min_backlink = st.sidebar.slider(
-        "Min Backlink Tahmini",
-        0,
-        max_backlink,
-        0
-    )
-else:
-    min_backlink = 0
-    st.sidebar.info("Backlink verisi henüz yok")
+# -------------------------------
+# BUTON
+# -------------------------------
+if st.button("🔍 Taramayı Başlat"):
+    if not niche:
+        st.warning("Lütfen bir niche giriniz")
+    else:
+        with st.spinner("Expired domainler aranıyor..."):
+            data = []
 
+            for i in range(domain_count):
+                backlink = random.randint(1, 500)
+                seo_score = random.randint(10, 100)
 
-filtered_df = df[
-    (df["seo_score"] >= min_seo) &
-    (df["seo_score"] <= max_seo) &
-    (df["niche"].isin(selected_niches)) &
-    (df["backlink_estimate"] >= min_backlink)
-]
+                if backlink >= min_backlink:
+                    data.append({
+                        "domain": f"{niche}{i+1}.com",
+                        "niche": niche,
+                        "backlink_estimate": backlink,
+                        "seo_score": seo_score
+                    })
 
-# -----------
+            df = pd.DataFrame(data)
+
+        if df.empty:
+            st.warning("Filtrelere uygun domain bulunamadı")
+        else:
+            st.success(f"{len(df)} domain bulundu")
+
+            st.dataframe(df, use_container_width=True)
+
+            csv = df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="📥 CSV olarak indir",
+                data=csv,
+                file_name=f"{niche}_expired_domains.csv",
+                mime="text/csv"
+            )
+
+# -------------------------------
+# FOOTER
+# -------------------------------
+st.markdown("---")
+st.caption("Expired Domain SaaS • Demo Version")
